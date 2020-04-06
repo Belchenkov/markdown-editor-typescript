@@ -6,6 +6,29 @@ enum TagType {
     HorizontalRule
 }
 
+interface IMarkdownDocument {
+    Add(...content : string[]) : void;
+    Get() : string;
+}
+
+class MarkdownDocument implements IMarkdownDocument {
+    private content : string = "";
+
+    Add(...content: string[]): void {
+        content.forEach(element => {
+            this.content += element;
+        });
+    }
+
+    Get(): string {
+        return this.content;
+    }
+}
+
+class ParseElement {
+    CurrentLine : string = "";
+}
+
 class HtmlHandler {
     public TextChangeHandler(id: string, output: string) : void {
         let markdown = <HTMLTextAreaElement>document.getElementById(id);
