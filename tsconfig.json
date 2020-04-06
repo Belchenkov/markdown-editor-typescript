@@ -2,8 +2,9 @@
   "compilerOptions": {
     "target": "ES2015",
     "module": "commonjs",
+    "lib": ["es2015", "es2016", "dom"],
     "sourceMap": true,
-    "outDir": "./script",
+    "outDir": "build/dist",
     "strict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
