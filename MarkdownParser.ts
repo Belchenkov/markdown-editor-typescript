@@ -11,6 +11,34 @@ interface IMarkdownDocument {
     Get() : string;
 }
 
+interface IVisitor {
+    Visit(token : ParseElement, markdownDocument : IMarkdownDocument) : void;
+}
+
+interface IVisitable {
+    Accept(
+        visitor : IVisitor,
+        token : ParseElement,
+        markdownDocument : IMarkdownDocument
+    ) : void;
+}
+
+abstract class VisitorBase implements IVisitor {
+    protected constructor(
+        private readonly tagType : TagType,
+        private readonly TagTypeToHtml : TagTypeToHtml
+    ) {}
+
+    Visit(token: ParseElement, markdownDocument: IMarkdownDocument): void {
+        markdownDocument.Add(
+            this.TagTypeToHtml.OpeningTag(this.tagType),
+            token.CurrentLine,
+            this.TagTypeToHtml.ClosingTag(this.tagType)
+        );
+    }
+
+}
+
 class MarkdownDocument implements IMarkdownDocument {
     private content : string = "";
 
@@ -77,4 +105,40 @@ class TagTypeToHtml {
     }
 
 
+}
+
+class Visible implements IVisitable {
+    Accept(visitor: IVisitor, token: ParseElement, markdownDocument: IMarkdownDocument): void {
+        visitor.Visit(token, markdownDocument);
+    }
+}
+
+class Header1Visitor extends VisitorBase {
+    constructor() {
+        super(TagType.Header1, new TagTypeToHtml());
+    }
+}
+
+class Header2Visitor extends VisitorBase {
+    constructor() {
+        super(TagType.Header2, new TagTypeToHtml());
+    }
+}
+
+class Header3Visitor extends VisitorBase {
+    constructor() {
+        super(TagType.Header3, new TagTypeToHtml());
+    }
+}
+
+class ParagraphVisitor extends VisitorBase {
+    constructor() {
+        super(TagType.Paragraph, new TagTypeToHtml());
+    }
+}
+
+class HorizontalRuleVisitor extends VisitorBase {
+    constructor() {
+        super(TagType.HorizontalRule, new TagTypeToHtml());
+    }
 }
