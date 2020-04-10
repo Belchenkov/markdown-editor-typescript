@@ -202,3 +202,58 @@ class LineParser {
         return output;
     }
 }
+
+class ParagraphHandler extends Handler<ParseElement> {
+    private readonly visitable : IVisitable = new Visible();
+    private readonly visitor : IVisitor = new ParagraphVisitor();
+
+    constructor(private readonly document : IMarkdownDocument) {
+        super();
+    }
+
+    protected CanHandle(request: ParseElement): boolean {
+        this.visitable.Accept(this.visitor, request, this.document);
+        return true;
+    }
+}
+
+class Header1ChainHandler extends ParseChainHandler {
+    constructor(document : IMarkdownDocument) {
+        super(document, "# ", new Header1Visitor());
+    }
+}
+
+class Header2ChainHandler extends ParseChainHandler {
+    constructor(document : IMarkdownDocument) {
+        super(document, "## ", new Header2Visitor());
+    }
+}
+
+class Header3ChainHandler extends ParseChainHandler {
+    constructor(document : IMarkdownDocument) {
+        super(document, "### ", new Header3Visitor());
+    }
+}
+
+class HorizontalRuleHandler extends ParseChainHandler {
+    constructor(document : IMarkdownDocument) {
+        super(document, "---", new HorizontalRuleVisitor());
+    }
+}
+
+class ChainOfResponsibilityFactory {
+    Build(document : IMarkdownDocument) : ParseChainHandler {
+        let header1 : Header1ChainHandler = new Header1ChainHandler(document);
+        let header2 : Header2ChainHandler = new Header2ChainHandler(document);
+        let header3 : Header3ChainHandler = new Header3ChainHandler(document);
+        let horizontalRule : HorizontalRuleHandler = new HorizontalRuleHandler(document);
+        let paragraph : ParagraphHandler = new ParagraphHandler(document);
+
+        header1.SetNext(header2);
+        header2.SetNext(header3);
+        header3.SetNext(horizontalRule);
+        horizontalRule.SetNext(paragraph);
+
+        return header1;
+    }
+}
